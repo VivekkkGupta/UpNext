@@ -14,11 +14,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 
 export default function CreateSpaceModal({ children }) {
   const router = useRouter()
-  const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [spaceName, setSpaceName] = useState("")
   const [isCreating, setIsCreating] = useState(false)

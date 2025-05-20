@@ -14,11 +14,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 
 export default function JoinSpaceModal({ children }) {
   const router = useRouter()
-  const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [spaceId, setSpaceId] = useState("")
   const [username, setUsername] = useState("")
