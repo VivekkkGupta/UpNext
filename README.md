@@ -4,3 +4,5 @@ UpNext is a tool designed for streamers on platforms like YouTube, Twitch, or In
 
 Creating Docker Container containing redis/redis-stack
 docker run -d --name redis-stack -p 6379:6379 -p 5540:5540 redis/redis-stack
+
+docker run -d -p 6379:6379 -p 8001:8001 -p 5540:5540 redis/redis-stack

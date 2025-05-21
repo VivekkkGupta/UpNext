@@ -3,6 +3,8 @@ import "./globals.css"
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "@/components/ui/sonner"
 import Header from "@/components/header"
+import { ClerkProvider } from "@clerk/nextjs"
+import { AppProvider } from "@/contexts/AppContext"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -13,14 +15,18 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-      <html lang="en">
-        <body className={inter.className + "bg-gradient-to-b from-gray-900 to-black "}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            <Header />
-            {children}
-            <Toaster richColors  />
-          </ThemeProvider>
-        </body>
-      </html>
+    <ClerkProvider>
+      <AppProvider>
+        <html lang="en">
+          <body className={inter.className + "bg-gradient-to-b from-gray-900 to-black "}>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+              <Header />
+              {children}
+              <Toaster richColors />
+            </ThemeProvider>
+          </body>
+        </html>
+      </AppProvider>
+    </ClerkProvider>
   )
 }
