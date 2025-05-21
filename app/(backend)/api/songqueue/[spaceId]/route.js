@@ -2,10 +2,9 @@
 import redisclient from "@/lib/redis";
 import { NextResponse } from "next/server";
 
-export async function GET(req) {
+export async function GET(req, { params }) {
     try {
-        const { searchParams } = new URL(req.url);
-        const spaceId = searchParams.get("spaceId");
+        const { spaceId } = params;
         const songs = await redisclient.get(`songs:${spaceId}`);
         if (!songs) {
             return NextResponse.json({ message: "No songs found" }, { status: 404 });
@@ -16,10 +15,9 @@ export async function GET(req) {
     }
 }
 
-export const POST = async (req) => {
+export const POST = async (req, { params }) => {
     try {
-        const { searchParams } = new URL(req.url);
-        const spaceId = searchParams.get("spaceId");
+        const { spaceId } = params
         const newSong = await req.json();
 
         // Get current songs array
@@ -43,20 +41,20 @@ export const POST = async (req) => {
 }
 
 export const DELETE = async (req) => {
-  try {
-    const { searchParams } = new URL(req.url)
-    const spaceId = searchParams.get("spaceId")
-    const { id: songId } = await req.json()
+    try {
+        const { searchParams } = new URL(req.url)
+        const spaceId = searchParams.get("spaceId")
+        const { id: songId } = await req.json()
 
-    const songsRaw = await redisclient.get(`songs:${spaceId}`)
-    let songs = []
-    if (songsRaw) songs = JSON.parse(songsRaw)
+        const songsRaw = await redisclient.get(`songs:${spaceId}`)
+        let songs = []
+        if (songsRaw) songs = JSON.parse(songsRaw)
 
-    const updatedSongs = songs.filter((song) => song.id !== songId)
-    await redisclient.set(`songs:${spaceId}`, JSON.stringify(updatedSongs))
+        const updatedSongs = songs.filter((song) => song.id !== songId)
+        await redisclient.set(`songs:${spaceId}`, JSON.stringify(updatedSongs))
 
-    return NextResponse.json({ message: "Song deleted", songs: updatedSongs }, { status: 200 })
-  } catch (error) {
-    return NextResponse.json({ message: "failure", error: error.message }, { status: 500 })
-  }
+        return NextResponse.json({ message: "Song deleted", songs: updatedSongs }, { status: 200 })
+    } catch (error) {
+        return NextResponse.json({ message: "failure", error: error.message }, { status: 500 })
+    }
 }

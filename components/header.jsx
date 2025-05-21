@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { useUser, SignOutButton } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
+import Image from "next/image"
 
 export default function Header() {
   const { isSignedIn, user, isLoaded } = useUser()
@@ -17,7 +18,7 @@ export default function Header() {
       router.push("/")
     }
   }
-  , [isLoaded, isSignedIn, router])
+    , [isLoaded, isSignedIn, router])
   return (
     <header className="border-b border-gray-800 bg-gray-900 py-4 w-full">
       <div className="max-w-[1240px] mx-auto flex items-center justify-between px-4">
@@ -29,7 +30,9 @@ export default function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="focus:outline-none rounded-full border-2 border-purple-600">
-                  <img
+                  <Image
+                    width={36}
+                    height={36}
                     src={user?.imageUrl}
                     alt={user?.fullName || "User"}
                     className="w-9 h-9 rounded-full object-cover"

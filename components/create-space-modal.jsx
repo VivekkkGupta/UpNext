@@ -15,12 +15,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
+import axios from "axios"
+import { useUser } from "@clerk/nextjs"
 
 export default function CreateSpaceModal({ children }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [spaceName, setSpaceName] = useState("")
   const [isCreating, setIsCreating] = useState(false)
+  const { user: clerkId } = useUser()
 
   const generateSpaceId = () => {
     // Generate a 5-character alphanumeric ID
@@ -41,17 +44,24 @@ export default function CreateSpaceModal({ children }) {
       // Generate a unique space ID
       const spaceId = generateSpaceId()
 
-      // In a real app, you would save this to a database
-      // For now, we'll just store it in localStorage
-      localStorage.setItem(
-        "musicVoteSpace",
-        JSON.stringify({
-          name: spaceName,
-          id: spaceId,
-          isHost: true,
-          createdAt: new Date().toISOString(),
-        }),
-      )
+      const spaceData = {
+        clerkId: clerkId,
+        name: spaceName,
+        id: spaceId,
+        isHost: true,
+        createdAt: new Date().toISOString(),
+      }
+
+      const { data } = await axios.post("/api/space", spaceData)
+      console.log("Space created:", data)
+      if (data.message !== "Space created") {
+        toast({
+          title: "Error",
+          description: "Failed to create space. Please try again.",
+          variant: "destructive",
+        })
+        throw new Error("Failed to create space")
+      }
 
       // Close the modal
       setOpen(false)
