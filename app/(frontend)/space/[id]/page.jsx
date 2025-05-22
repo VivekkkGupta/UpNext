@@ -48,7 +48,6 @@ function extractYouTubeID(url) {
 
 export default function SpacePage({ params }) {
   const { id } = use(params)
-  console.log("Space ID:", id)
   const router = useRouter()
   const [spaceInfo, setSpaceInfo] = useState(null)
   const [songs, setSongs] = useState([])
@@ -58,27 +57,6 @@ export default function SpacePage({ params }) {
   const playerRef = useRef(null)
   const playerContainerRef = useRef(null)
 
-  useEffect(() => {
-    // Check if user has space info in localStorage
-    const storedSpace = localStorage.getItem("musicVoteSpace")
-
-    if (!storedSpace) {
-      // Redirect to home if no space info
-      router.push("/")
-      return
-    }
-
-    const spaceData = JSON.parse(storedSpace)
-
-    // Verify the ID matches
-    if (spaceData.id !== id) {
-      router.push("/")
-      return
-    }
-
-    setSpaceInfo(spaceData)
-
-  }, [id, router])
 
   const fetchSongs = async () => {
     try {
@@ -95,9 +73,29 @@ export default function SpacePage({ params }) {
       console.error(error)
     }
   }
+
+  const fetchSpaceInfo = async () => {
+    try {
+      const { data } = await axios.get(`/api/space/${id}`)
+      if (data.message === "success") {
+        setSpaceInfo(data.space)
+      } else {
+        toast.error("Failed to fetch space info")
+      }
+      console.log("Fetched Space Info:", data.space)
+    } catch (error) {
+      toast.error("Failed to fetch space info")
+      console.error(error)
+    }
+  }
+
   // Fetch songs when the component mounts
   useEffect(() => {
-    console.log(songs)
+    // setting space Info
+    console.log("fetching space info...")
+    fetchSpaceInfo()
+    
+    console.log("fetching songs...")
     fetchSongs()
   }, [])
 

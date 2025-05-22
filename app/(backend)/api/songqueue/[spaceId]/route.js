@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(req, { params }) {
     try {
-        const { spaceId } = params;
+        const { spaceId } = await params;
         const songs = await redisclient.get(`songs:${spaceId}`);
         if (!songs) {
             return NextResponse.json({ message: "No songs found" }, { status: 404 });
@@ -17,7 +17,7 @@ export async function GET(req, { params }) {
 
 export const POST = async (req, { params }) => {
     try {
-        const { spaceId } = params
+        const { spaceId } = await params
         const newSong = await req.json();
 
         // Get current songs array
@@ -40,10 +40,9 @@ export const POST = async (req, { params }) => {
     }
 }
 
-export const DELETE = async (req) => {
+export const DELETE = async (req,{params}) => {
     try {
-        const { searchParams } = new URL(req.url)
-        const spaceId = searchParams.get("spaceId")
+        const { spaceId } = await params
         const { id: songId } = await req.json()
 
         const songsRaw = await redisclient.get(`songs:${spaceId}`)

@@ -17,9 +17,11 @@ import {
 import { toast } from "sonner"
 import axios from "axios"
 import { useUser } from "@clerk/nextjs"
+import { useAppContext } from "@/contexts/AppContext"
 
 export default function CreateSpaceModal({ children }) {
   const router = useRouter()
+  const { fetchSpaces } = useAppContext()
   const [open, setOpen] = useState(false)
   const [spaceName, setSpaceName] = useState("")
   const [isCreating, setIsCreating] = useState(false)
@@ -45,36 +47,40 @@ export default function CreateSpaceModal({ children }) {
       const spaceId = generateSpaceId()
 
       const spaceData = {
-        clerkId: clerkId,
+        clerkId: clerkId.id,
         name: spaceName,
         id: spaceId,
         isHost: true,
         createdAt: new Date().toISOString(),
       }
+      console.log("Space data:", spaceData)
 
       const { data } = await axios.post("/api/space", spaceData)
-      console.log("Space created:", data)
       if (data.message !== "Space created") {
-        toast({
-          title: "Error",
-          description: "Failed to create space. Please try again.",
-          variant: "destructive",
-        })
+        toast.error("Failed to create space. Please try again.")
         throw new Error("Failed to create space")
       }
 
-      // Close the modal
-      setOpen(false)
+      if (data.message === "Space already exists") {
+        toast.error("Space ID already exists. Please try again.")
+        setIsCreating(false)
+        return
+      }
 
-      // Navigate to the space
-      router.push(`/space/${spaceId}`)
+      await fetchSpaces() // Refetch spaces after creation
+
+      setOpen(false)
+      const { space } = data
+      localStorage.setItem("musicVoteSpace", JSON.stringify(space))
+      router.push(`/space/${space.id}`)
     } catch (error) {
-      console.error("Failed to create space:", error)
-      toast({
-        title: "Error",
-        description: "Failed to create space. Please try again.",
-        variant: "destructive",
-      })
+      if (error.response && error.response.status === 403) {
+        toast.error("Space limit reached. Please delete an existing space.")
+        setOpen(false)
+        router.push(`/myspaces`)
+      } else {
+        toast.error("Failed to create space. Please try again.")
+      }
       setIsCreating(false)
     }
   }

@@ -3,15 +3,15 @@ import { NextResponse } from "next/server";
 
 export async function GET(req, { params }) {
     try {
-        const { spaceId } = params;
+        const { spaceId } = await params;
 
-        const spaceDetails = await redisclient.get(`space:${spaceId}`);
+        const space = await redisclient.get(`space:${spaceId}`);
 
-        if (!spaceDetails) {
+        if (!space) {
             return NextResponse.json({ message: "No space found" }, { status: 404 });
         }
 
-        return NextResponse.json({ message: "success", spaceDetails: JSON.parse(spaceDetails) }, { status: 200 });
+        return NextResponse.json({ message: "success", space: JSON.parse(space) }, { status: 200 });
     } catch (error) {
         return NextResponse.json({ message: "failure", error: error.message }, { status: 500 });
     }
@@ -19,7 +19,7 @@ export async function GET(req, { params }) {
 
 export const DELETE = async (req, { params }) => {
     try {
-        const { spaceId } = params;
+        const { spaceId } = await params;
 
         if (!spaceId) {
             return NextResponse.json({ message: "No space ID provided" }, { status: 400 })
