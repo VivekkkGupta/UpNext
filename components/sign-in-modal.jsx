@@ -32,8 +32,8 @@ export default function SignInModal({ children }) {
                 },
                 variables: {
                   colorPrimary: "#9333ea",
-                  colorText: "#fff",
-                  colorBackground: "#1f2937",
+                  colorText: "#1f2937",
+                  colorBackground: "#fff",
                 },
               }}
               routing="hash"

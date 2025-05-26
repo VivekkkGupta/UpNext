@@ -352,108 +352,39 @@ export default function SpacePage({ params }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
       <main className="container mx-auto px-4 py-6 max-w-[1240px]">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">{spaceInfo.name || "Music Space"}</h1>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-gray-400">
-                ID: {id}
-              </Badge>
-              <Button variant="ghost" size="icon" onClick={handleShareSpace} className="h-6 w-6 text-gray-400">
-                <Share2 className="h-4 w-4" />
-              </Button>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Section: Video Player + Song Queue */}
+          <div className="w-full lg:w-2/3 flex flex-col gap-6">
+            {/* Video Player */}
+            <div className="overflow-hidden rounded-lg bg-gray-800 shadow-lg">
+              <div className="aspect-video w-full" ref={playerContainerRef}></div>
             </div>
-          </div>
-
-          {spaceInfo.isHost && (
-            <Dialog open={isAddingOpen} onOpenChange={setIsAddingOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" className="text-white bg-purple-600 hover:bg-purple-700">
-                  <Plus className="mr-1 h-4 w-4" /> Add Video
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-gray-800 text-white sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Add YouTube Video</DialogTitle>
-                  <DialogDescription className="text-gray-400">
-                    Paste a YouTube video URL to add to the queue
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Input
-                      placeholder="https://www.youtube.com/watch?v=..."
-                      value={newVideoUrl}
-                      onChange={(e) => setNewVideoUrl(e.target.value)}
-                      className="border-gray-700 bg-gray-900 text-white"
-                    />
-                  </div>
+            {currentlyPlaying && (
+              <div className="rounded-lg bg-gray-800 p-4">
+                <h3 className="line-clamp-2 text-lg font-medium text-white">{currentlyPlaying.title}</h3>
+                <p className="text-purple-300">{currentlyPlaying.artist}</p>
+                <div className="mt-2 flex items-center text-sm text-gray-400">
+                  <span className="mr-4">{currentlyPlaying.videoDuration}</span>
+                  <span className="mr-4">{formatNumber(Number.parseInt(currentlyPlaying.viewCount || 0))} views</span>
+                  <span>{formatNumber(Number.parseInt(currentlyPlaying.likeCount || 0))} likes</span>
                 </div>
-                <DialogFooter>
-                  <Button variant="ghost" onClick={() => setIsAddingOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    className="bg-purple-600 hover:bg-purple-700"
-                    onClick={handleAddVideo}
-                    disabled={!newVideoUrl}
-                  >
-                    Add Video
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-
-        {/* Video Player Section - Always at the top */}
-        <div className="mb-8">
-          <div className="overflow-hidden rounded-lg bg-black">
-            <div className="aspect-video w-full" ref={playerContainerRef}></div>
-          </div>
-          {currentlyPlaying && (
-            <div className="mt-4 rounded-lg bg-gray-800 p-4">
-              <h3 className="line-clamp-2 text-lg font-medium text-white">{currentlyPlaying.title}</h3>
-              <p className="text-purple-300">{currentlyPlaying.artist}</p>
-              <div className="mt-2 flex items-center text-sm text-gray-400">
-                <span className="mr-4">{currentlyPlaying.videoDuration}</span>
-                <span className="mr-4">{formatNumber(Number.parseInt(currentlyPlaying.viewCount || 0))} views</span>
-                <span>{formatNumber(Number.parseInt(currentlyPlaying.likeCount || 0))} likes</span>
               </div>
-            </div>
-          )}
+            )}
+            {spaceInfo.isHost && (
+              <div className="flex justify-end">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-purple-600 text-purple-400 hover:bg-gray-700 hover:text-purple-300"
+                  onClick={playNextSong}
+                  disabled={songs.length === 0}
+                >
+                  Play Next Most Voted Song
+                </Button>
+              </div>
+            )}
 
-          {spaceInfo.isHost && (
-            <div className="mt-4 flex justify-end">
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-purple-600 text-purple-400 hover:bg-gray-700 hover:text-purple-300"
-                onClick={playNextSong}
-                disabled={songs.length === 0}
-              >
-                Play Next Most Voted Song
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Tabs for different sections */}
-        <Tabs defaultValue="queue" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-gray-800">
-            <TabsTrigger value="queue" className="data-[state=active]:bg-purple-900">
-              <ListMusic className="mr-2 h-4 w-4" /> Song Queue
-            </TabsTrigger>
-            <TabsTrigger value="user" className="data-[state=active]:bg-purple-900">
-              <UserCircle className="mr-2 h-4 w-4" /> User Suggestions
-            </TabsTrigger>
-            <TabsTrigger value="ai" className="data-[state=active]:bg-purple-900">
-              <Sparkles className="mr-2 h-4 w-4" /> AI Suggestions
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Song Queue Tab */}
-          <TabsContent value="queue" className="mt-4">
+            {/* Song Queue */}
             <Card className="bg-gray-800 border-gray-700">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white flex items-center justify-between">
@@ -482,7 +413,6 @@ export default function SpacePage({ params }) {
                               <div className="flex h-full w-12 flex-shrink-0 items-center justify-center bg-purple-900 p-4 text-xl font-bold">
                                 #{index + 1}
                               </div>
-
                               {/* Thumbnail */}
                               <div className="ml-2 border border-gray-600 rounded-md overflow-hidden relative flex items-center">
                                 <Image
@@ -496,21 +426,19 @@ export default function SpacePage({ params }) {
                                   {song.videoDuration}
                                 </div>
                               </div>
-
                               {/* Song info */}
                               <div className="flex flex-1 flex-col justify-between p-3">
                                 <div>
                                   <h3 className="line-clamp-1 font-medium text-white">{song.title}</h3>
                                   <p className="text-sm text-purple-300">{song.artist}</p>
                                 </div>
-
                                 <div className="mt-1 flex items-center text-xs text-gray-400">
                                   <span className="mr-3">{formatNumber(Number.parseInt(song.viewCount))} views</span>
                                   <span>{formatNumber(Number.parseInt(song.likeCount))} likes</span>
                                   <span className="ml-auto text-gray-500">Added by {song.addedBy}</span>
-
                                   {spaceInfo.isHost && (
                                     <div className="ml-2 mr-2">
+                                      {/* ...existing AlertDialog for remove... */}
                                       <AlertDialog>
                                         <AlertDialogTrigger asChild>
                                           <Button
@@ -588,156 +516,170 @@ export default function SpacePage({ params }) {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
 
-          {/* User Suggestions Tab */}
-          <TabsContent value="user" className="mt-4">
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-white flex items-center justify-between">
-                  <span>User Suggested Songs</span>
-                  <Badge className="bg-blue-600">{userSuggestions.length} suggestions</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {userSuggestions.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-8 text-center">
-                    <UserCircle className="mb-2 h-12 w-12 text-gray-500" />
-                    <p className="text-gray-400">No user suggestions yet</p>
-                    <p className="text-sm text-gray-500">Add a YouTube video to suggest songs</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-3">
-                    {userSuggestions.map((song) => (
-                      <Card key={song.id} className="overflow-hidden bg-gray-700 text-white p-0">
-                        <CardContent className="p-0">
-                          <div className="flex items-center justify-between p-2">
-                            {/* Thumbnail */}
-                            <div className="ml-2 border border-gray-600 rounded-md overflow-hidden relative flex items-center">
-                              <Image
-                                src={song.thumbnailUrl || "/placeholder.svg"}
-                                alt={song.title}
-                                width={112}
-                                height={64}
-                                className="h-16 w-28 rounded object-cover"
-                              />
-                              <div className="absolute bottom-1 right-1 rounded bg-black bg-opacity-70 px-2 py-0.5 text-xs">
-                                {song.videoDuration}
+          {/* Right Section: Tabs for User & AI Suggestions */}
+          <div className="w-full lg:w-1/3 flex flex-col gap-6">
+            <Tabs defaultValue="user" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-gray-800">
+                <TabsTrigger value="user" className="data-[state=active]:bg-blue-900">
+                  <UserCircle className="mr-2 h-4 w-4" /> User Suggestions
+                </TabsTrigger>
+                <TabsTrigger value="ai" className="data-[state=active]:bg-purple-900">
+                  <Sparkles className="mr-2 h-4 w-4" /> AI Suggestions
+                </TabsTrigger>
+              </TabsList>
+
+              {/* User Suggestions Tab */}
+              <TabsContent value="user" className="mt-4">
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-white flex items-center justify-between">
+                      <span>User Suggested Songs</span>
+                      <Badge className="bg-blue-600">{userSuggestions.length} suggestions</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {userSuggestions.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center p-8 text-center">
+                        <UserCircle className="mb-2 h-12 w-12 text-gray-500" />
+                        <p className="text-gray-400">No user suggestions yet</p>
+                        <p className="text-sm text-gray-500">Add a YouTube video to suggest songs</p>
+                      </div>
+                    ) : (
+                      <div className="grid gap-3">
+                        {userSuggestions.map((song) => (
+                          <Card key={song.id} className="overflow-hidden bg-gray-700 text-white p-0">
+                            <CardContent className="p-0">
+                              <div className="flex items-center justify-between p-2">
+                                {/* Thumbnail */}
+                                <div className="ml-2 border border-gray-600 rounded-md overflow-hidden relative flex items-center">
+                                  <Image
+                                    src={song.thumbnailUrl || "/placeholder.svg"}
+                                    alt={song.title}
+                                    width={112}
+                                    height={64}
+                                    className="h-16 w-28 rounded object-cover"
+                                  />
+                                  <div className="absolute bottom-1 right-1 rounded bg-black bg-opacity-70 px-2 py-0.5 text-xs">
+                                    {song.videoDuration}
+                                  </div>
+                                </div>
+
+                                {/* Song info */}
+                                <div className="flex flex-1 flex-col justify-between p-3">
+                                  <div>
+                                    <h3 className="line-clamp-1 font-medium text-white">{song.title}</h3>
+                                    <p className="text-sm text-blue-300">{song.artist}</p>
+                                  </div>
+
+                                  <div className="mt-1 flex items-center text-xs text-gray-400">
+                                    <span className="mr-3">{formatNumber(Number.parseInt(song.viewCount))} views</span>
+                                    <span>{formatNumber(Number.parseInt(song.likeCount))} likes</span>
+                                    <span className="ml-auto text-gray-500">Added by {song.addedBy}</span>
+                                  </div>
+                                </div>
+
+                                {/* Add to Queue button */}
+                                <div className="pr-2">
+                                  <Button
+                                    size="sm"
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                    onClick={() => addToQueue(song)}
+                                  >
+                                    Add to Queue
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-                            {/* Song info */}
-                            <div className="flex flex-1 flex-col justify-between p-3">
-                              <div>
-                                <h3 className="line-clamp-1 font-medium text-white">{song.title}</h3>
-                                <p className="text-sm text-blue-300">{song.artist}</p>
+              {/* AI Suggestions Tab */}
+              <TabsContent value="ai" className="mt-4">
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-white flex items-center justify-between">
+                      <span>AI Suggested Songs</span>
+                      <Button
+                        size="sm"
+                        className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
+                        onClick={getAiSuggestions}
+                        disabled={isLoadingAi}
+                      >
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        {isLoadingAi ? "Generating..." : "Get AI Suggestions"}
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {aiSuggestions.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center p-8 text-center">
+                        <Sparkles className="mb-2 h-12 w-12 text-gray-500" />
+                        <p className="text-gray-400">No AI suggestions yet</p>
+                        <p className="text-sm text-gray-500">Click the button above to get song suggestions from AI</p>
+                      </div>
+                    ) : (
+                      <div className="grid gap-3">
+                        {aiSuggestions.map((song) => (
+                          <Card key={song.id} className="overflow-hidden bg-gray-700 text-white p-0">
+                            <CardContent className="p-0">
+                              <div className="flex items-center justify-between p-2">
+                                {/* Thumbnail */}
+                                <div className="ml-2 border border-gray-600 rounded-md overflow-hidden relative flex items-center">
+                                  <Image
+                                    src={song.thumbnailUrl || "/placeholder.svg"}
+                                    alt={song.title}
+                                    width={112}
+                                    height={64}
+                                    className="h-16 w-28 rounded object-cover"
+                                  />
+                                  <div className="absolute bottom-1 right-1 rounded bg-black bg-opacity-70 px-2 py-0.5 text-xs">
+                                    {song.videoDuration}
+                                  </div>
+                                </div>
+
+                                {/* Song info */}
+                                <div className="flex flex-1 flex-col justify-between p-3">
+                                  <div>
+                                    <h3 className="line-clamp-1 font-medium text-white">{song.title}</h3>
+                                    <p className="text-sm text-pink-300">{song.artist}</p>
+                                  </div>
+
+                                  <div className="mt-1 flex items-center text-xs text-gray-400">
+                                    <span className="mr-3">{formatNumber(Number.parseInt(song.viewCount))} views</span>
+                                    <span>{formatNumber(Number.parseInt(song.likeCount))} likes</span>
+                                    <span className="ml-auto text-gray-500">Suggested by AI</span>
+                                  </div>
+                                </div>
+
+                                {/* Add to Queue button */}
+                                <div className="pr-2">
+                                  <Button
+                                    size="sm"
+                                    className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
+                                    onClick={() => addToQueue(song)}
+                                  >
+                                    Add to Queue
+                                  </Button>
+                                </div>
                               </div>
-
-                              <div className="mt-1 flex items-center text-xs text-gray-400">
-                                <span className="mr-3">{formatNumber(Number.parseInt(song.viewCount))} views</span>
-                                <span>{formatNumber(Number.parseInt(song.likeCount))} likes</span>
-                                <span className="ml-auto text-gray-500">Added by {song.addedBy}</span>
-                              </div>
-                            </div>
-
-                            {/* Add to Queue button */}
-                            <div className="pr-2">
-                              <Button
-                                size="sm"
-                                className="bg-blue-600 hover:bg-blue-700"
-                                onClick={() => addToQueue(song)}
-                              >
-                                Add to Queue
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* AI Suggestions Tab */}
-          <TabsContent value="ai" className="mt-4">
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-white flex items-center justify-between">
-                  <span>AI Suggested Songs</span>
-                  <Button
-                    size="sm"
-                    className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
-                    onClick={getAiSuggestions}
-                    disabled={isLoadingAi}
-                  >
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    {isLoadingAi ? "Generating..." : "Get AI Suggestions"}
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {aiSuggestions.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-8 text-center">
-                    <Sparkles className="mb-2 h-12 w-12 text-gray-500" />
-                    <p className="text-gray-400">No AI suggestions yet</p>
-                    <p className="text-sm text-gray-500">Click the button above to get song suggestions from AI</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-3">
-                    {aiSuggestions.map((song) => (
-                      <Card key={song.id} className="overflow-hidden bg-gray-700 text-white p-0">
-                        <CardContent className="p-0">
-                          <div className="flex items-center justify-between p-2">
-                            {/* Thumbnail */}
-                            <div className="ml-2 border border-gray-600 rounded-md overflow-hidden relative flex items-center">
-                              <Image
-                                src={song.thumbnailUrl || "/placeholder.svg"}
-                                alt={song.title}
-                                width={112}
-                                height={64}
-                                className="h-16 w-28 rounded object-cover"
-                              />
-                              <div className="absolute bottom-1 right-1 rounded bg-black bg-opacity-70 px-2 py-0.5 text-xs">
-                                {song.videoDuration}
-                              </div>
-                            </div>
-
-                            {/* Song info */}
-                            <div className="flex flex-1 flex-col justify-between p-3">
-                              <div>
-                                <h3 className="line-clamp-1 font-medium text-white">{song.title}</h3>
-                                <p className="text-sm text-pink-300">{song.artist}</p>
-                              </div>
-
-                              <div className="mt-1 flex items-center text-xs text-gray-400">
-                                <span className="mr-3">{formatNumber(Number.parseInt(song.viewCount))} views</span>
-                                <span>{formatNumber(Number.parseInt(song.likeCount))} likes</span>
-                                <span className="ml-auto text-gray-500">Suggested by AI</span>
-                              </div>
-                            </div>
-
-                            {/* Add to Queue button */}
-                            <div className="pr-2">
-                              <Button
-                                size="sm"
-                                className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600"
-                                onClick={() => addToQueue(song)}
-                              >
-                                Add to Queue
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
       </main>
     </div>
   )
